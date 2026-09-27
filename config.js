@@ -123,9 +123,11 @@ window.CONFIG = {
   },
 
   // ----- MÚSICA DE FUNDO -------------------------------------------------
-  // volume: de 0 (mudo) a 1 (máximo). O padrão 0.30 é agradável e não
-  //         briga com o áudio do vídeo.
+  // Volumes independentes: durante o vídeo e depois, no convite principal.
+  // A música NÃO é pausada na troca, o que ajuda na compatibilidade com Safari/iPhone.
   musica: {
-    volume: 0.20
+    volume: 0.60,
+    volumeVideo: 0.20,
+    volumePrincipal: 0.60
   }
 };

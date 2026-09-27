@@ -255,7 +255,7 @@
           corLegenda:"#ffffff",
           posicao:{left:8,top:48,width:84,height:16}
         }, CFG.contagem || {}),
-        musica: Object.assign({ volume:0.30 }, CFG.musica || {})
+        musica: Object.assign({ volume:0.30, volumeVideo:0.20, volumePrincipal:0.60 }, CFG.musica || {})
       };
 
       // Compatibilidade: aceita "contagem" ou "countdown" dentro de hotspots.
@@ -444,21 +444,30 @@
       }
 
       // ---- MÚSICA (desbloqueio no toque, compatível com iPhone) ----------
-      const MUSIC_VOLUME = Math.max(0, Math.min(1, C.musica.volume || 0));
+      const MUSIC_VOLUME = Math.max(0, Math.min(1, C.musica.volume ?? 0.30));
+      const MUSIC_VOLUME_VIDEO = Math.max(0, Math.min(1, C.musica.volumeVideo ?? 0.20));
+      const MUSIC_VOLUME_MAIN = Math.max(0, Math.min(1, C.musica.volumePrincipal ?? C.musica.volume ?? 0.60));
       let musicStarted = false, musicFadeTimer = null;
       function fadeMusicTo(target){
         clearInterval(musicFadeTimer);
-        music.volume = Math.min(music.volume || 0.001, target);
+        target = Math.max(0, Math.min(1, target));
+        const step = 0.025;
         musicFadeTimer = setInterval(()=>{
-          music.volume = Math.min(target, (music.volume || 0) + 0.025);
-          if(music.volume >= target) clearInterval(musicFadeTimer);
-        }, 120);
+          const current = Number.isFinite(music.volume) ? music.volume : 0;
+          if(Math.abs(current - target) <= step){
+            music.volume = target;
+            clearInterval(musicFadeTimer);
+            return;
+          }
+          music.volume = current < target ? Math.min(target, current + step) : Math.max(target, current - step);
+        }, 80);
       }
-      async function startMusic(force){
+      async function startMusic(force, targetVolume = MUSIC_VOLUME){
         try{
           // Se a música já estiver tocando, mantém a reprodução contínua.
           if(musicStarted && !music.paused){
             document.body.classList.remove("need-music");
+            fadeMusicTo(targetVolume);
             return true;
           }
 
@@ -476,7 +485,7 @@
 
           musicStarted = true;
           document.body.classList.remove("need-music");
-          fadeMusicTo(MUSIC_VOLUME);
+          fadeMusicTo(targetVolume);
           return true;
         }catch(e){
           musicStarted = false;
@@ -503,9 +512,11 @@
           // Só tenta iniciar novamente se a música realmente estiver parada.
           // Assim ela continua do ponto atual ao sair do vídeo.
           if(!musicStarted || music.paused){
-            startMusic(true).then((ok)=>{
+            startMusic(true, MUSIC_VOLUME_MAIN).then((ok)=>{
               if(!ok) document.body.classList.add("need-music");
             });
+          } else {
+            fadeMusicTo(MUSIC_VOLUME_MAIN);
           }
         };
 
@@ -529,7 +540,7 @@
           video.volume = 1;
 
           // Música e vídeo são solicitados imediatamente no mesmo gesto.
-          const musicPromise = startMusic(false);
+          const musicPromise = startMusic(false, MUSIC_VOLUME_VIDEO);
           const videoPromise = video.play();
 
           Promise.resolve(musicPromise).then((ok)=>{
@@ -542,7 +553,7 @@
               ensureMusicButton();
             });
         } else {
-          startMusic(false).then((ok)=>{
+          startMusic(false, MUSIC_VOLUME_MAIN).then((ok)=>{
             if(!ok) document.body.classList.add("need-music");
           });
           goMain();
