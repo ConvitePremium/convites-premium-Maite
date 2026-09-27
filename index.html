@@ -639,13 +639,24 @@
         });
         $("countdownBackBtn")?.addEventListener("click", ()=> show("mainScreen"));
       }
+      function currentMusicTargetVolume(){
+        // No Safari/iPhone, o botão de desbloqueio pode ser acionado enquanto
+        // o vídeo ainda está na tela. Nesse caso, respeita o volume baixo do vídeo.
+        if(hasVideo && $("videoScreen")?.classList.contains("active")){
+          return MUSIC_VOLUME_VIDEO;
+        }
+        return MUSIC_VOLUME_MAIN;
+      }
+
       musicUnlock.addEventListener("click", async()=>{
         document.body.classList.remove("need-music");
-        const ok = await startMusic(true);
+        const ok = await startMusic(true, currentMusicTargetVolume());
         if(!ok) document.body.classList.add("need-music");
       });
       document.addEventListener("visibilitychange", ()=>{
-        if(!document.hidden && musicStarted && music.paused) startMusic(false);
+        if(!document.hidden && musicStarted && music.paused){
+          startMusic(false, currentMusicTargetVolume());
+        }
       });
 
       // ---- CONTAGEM REGRESSIVA ---------------------------------------------

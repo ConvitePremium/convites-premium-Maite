@@ -31,7 +31,7 @@ window.CONFIG = {
   // mensagem: texto que já vem pré-preenchido quando a pessoa abre o WhatsApp.
   whatsapp: {
     numero: "5591985613837",
-    mensagem: "Olá! Confirmo minha presença no aniversário da Maitê."
+    mensagem: "Olá! Confirmo minha presença no aniversário da Maria Helena."
   },
 
   // ----- LOCALIZAÇÃO (BOTÃO MAPA) ----------------------------------------
@@ -89,7 +89,9 @@ window.CONFIG = {
   // mostrarTexto: true mostra “Voltar”; false deixa apenas a área clicável.
   // A posição pode ser alterada no editor ?editor=1.
   botoesVoltar: {
-    presentes: { mostrarTexto:false, posicao: {"left":36.26390088358627,"top":82.90955297631103,"width":27.805105581070286,"height":8.260292162785815} },
+    presentes: { mostrarTexto:false, posicao: {"left":24.2,"top":83.6,"width":55.0,"height":7.8} },
+    dresscode: { mostrarTexto:true, posicao: {"left":26.805437549920125,"top":86.88550214891683,"width":46.581485248602235,"height":5.424627114446271} },
+    manual: { mostrarTexto:true, posicao: {"left":25.783057732627793,"top":85.2744510457582,"width":47.80830358925719,"height":5.309555171188598} }
   },
 
   // ----- POSIÇÃO DOS BOTÕES NA TELA PRINCIPAL ----------------------------
@@ -97,9 +99,12 @@ window.CONFIG = {
   // use o editor (?editor=1) e cole o resultado aqui.
   //   left/top: canto superior esquerdo do botão
   //   width/height: tamanho do botão
-   hotspots: {
-        confirm: { left:54.280353870607755, top:86.58801914052023, width:29.867195294568692, height:7.536702804008758 },
-        gift: { left:14.524540721725387, top:86.69224434309393, width:32.039932982228436, height:7.377663130789937 }
+    hotspots: {
+        confirm: { left:19.111031037141306, top:63.8032059022128, width:15.963035699920129, height:8.57238650880756 },
+        map: { left:42.3313764835857, top:64.03332543810177, width:15.611963461541478, height:8.522989476077747 },
+        gift: { left:64.6203873670928, top:63.907444274051855, width:16.091044953075077, height:8.643484137471408 },
+        dress: { left:30.670926517571885, top:77.02597723193821, width:15.682105506190094, height:8.298251846116688 },
+        manual: { left:53.98780574768387, top:76.56567628964217, width:16.29551467651757, height:8.528402317264716 }
   },
 
   // ----- CONTAGEM REGRESSIVA ---------------------------------------------
@@ -121,8 +126,8 @@ window.CONFIG = {
   // Volumes independentes: durante o vídeo e depois, no convite principal.
   // A música NÃO é pausada na troca, o que ajuda na compatibilidade com Safari/iPhone.
   musica: {
-    volume: 0.05,
-    volumeVideo: 0.05,
-    volumePrincipal: 0.30
+    volume: 0.60,
+    volumeVideo: 0.20,
+    volumePrincipal: 0.60
   }
 };
