@@ -128,6 +128,6 @@ window.CONFIG = {
   musica: {
     volume: 0.05,
     volumeVideo: 0.05,
-    volumePrincipal: 0.60
+    volumePrincipal: 0.30
   }
 };
