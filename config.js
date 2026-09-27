@@ -126,7 +126,7 @@ window.CONFIG = {
   // Volumes independentes: durante o vídeo e depois, no convite principal.
   // A música NÃO é pausada na troca, o que ajuda na compatibilidade com Safari/iPhone.
   musica: {
-    volume: 0.60,
+    volume: 0.20,
     volumeVideo: 0.20,
     volumePrincipal: 0.60
   }
