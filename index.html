@@ -448,23 +448,76 @@
       const MUSIC_VOLUME_VIDEO = Math.max(0, Math.min(1, C.musica.volumeVideo ?? 0.20));
       const MUSIC_VOLUME_MAIN = Math.max(0, Math.min(1, C.musica.volumePrincipal ?? C.musica.volume ?? 0.60));
       let musicStarted = false, musicFadeTimer = null;
+
+      // Controle real de volume para Safari/iPhone via Web Audio.
+      // O elemento <audio>.volume sozinho não é confiável no iOS.
+      let musicAudioContext = null, musicSource = null, musicGain = null;
+
+      function ensureMusicAudioGraph(){
+        try{
+          if(!musicAudioContext){
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if(!AC) return false;
+            musicAudioContext = new AC();
+            musicSource = musicAudioContext.createMediaElementSource(music);
+            musicGain = musicAudioContext.createGain();
+            musicSource.connect(musicGain);
+            musicGain.connect(musicAudioContext.destination);
+          }
+          return !!musicGain;
+        }catch(e){
+          return false;
+        }
+      }
+
+      async function resumeMusicAudioContext(){
+        if(ensureMusicAudioGraph() && musicAudioContext.state === "suspended"){
+          try{ await musicAudioContext.resume(); }catch(e){}
+        }
+      }
+
+      function setMusicLevel(value){
+        const v = Math.max(0, Math.min(1, value));
+        if(ensureMusicAudioGraph()){
+          music.volume = 1;
+          musicGain.gain.value = v;
+        }else{
+          music.volume = v;
+        }
+      }
+
+      function currentMusicLevel(){
+        return musicGain ? musicGain.gain.value :
+          (Number.isFinite(music.volume) ? music.volume : 0);
+      }
+
       function fadeMusicTo(target){
         clearInterval(musicFadeTimer);
         target = Math.max(0, Math.min(1, target));
         const step = 0.025;
         musicFadeTimer = setInterval(()=>{
-          const current = Number.isFinite(music.volume) ? music.volume : 0;
+          const current = currentMusicLevel();
           if(Math.abs(current - target) <= step){
-            music.volume = target;
+            setMusicLevel(target);
             clearInterval(musicFadeTimer);
             return;
           }
-          music.volume = current < target ? Math.min(target, current + step) : Math.max(target, current - step);
+          setMusicLevel(current < target
+            ? Math.min(target, current + step)
+            : Math.max(target, current - step));
         }, 80);
       }
-      async function startMusic(force, targetVolume = MUSIC_VOLUME){
+
+      function desiredMusicVolume(){
+        return hasVideo && $("videoScreen")?.classList.contains("active")
+          ? MUSIC_VOLUME_VIDEO
+          : MUSIC_VOLUME_MAIN;
+      }
+
+      async function startMusic(force, targetVolume = desiredMusicVolume()){
         try{
-          // Se a música já estiver tocando, mantém a reprodução contínua.
+          await resumeMusicAudioContext();
+
           if(musicStarted && !music.paused){
             document.body.classList.remove("need-music");
             fadeMusicTo(targetVolume);
@@ -472,9 +525,7 @@
           }
 
           music.muted = false;
-          // Começa praticamente inaudível para evitar um pico de volume no iPhone
-          // antes de aplicar o volume configurado.
-          music.volume = 0.001;
+          setMusicLevel(targetVolume);
           await music.play();
 
           // Confirma que o navegador realmente iniciou a reprodução.
@@ -639,23 +690,15 @@
         });
         $("countdownBackBtn")?.addEventListener("click", ()=> show("mainScreen"));
       }
-      function currentMusicTargetVolume(){
-        // No Safari/iPhone, o botão de desbloqueio pode ser acionado enquanto
-        // o vídeo ainda está na tela. Nesse caso, respeita o volume baixo do vídeo.
-        if(hasVideo && $("videoScreen")?.classList.contains("active")){
-          return MUSIC_VOLUME_VIDEO;
-        }
-        return MUSIC_VOLUME_MAIN;
-      }
-
       musicUnlock.addEventListener("click", async()=>{
         document.body.classList.remove("need-music");
-        const ok = await startMusic(true, currentMusicTargetVolume());
+        const target = desiredMusicVolume();
+        const ok = await startMusic(true, target);
         if(!ok) document.body.classList.add("need-music");
       });
       document.addEventListener("visibilitychange", ()=>{
         if(!document.hidden && musicStarted && music.paused){
-          startMusic(false, currentMusicTargetVolume());
+          startMusic(false, desiredMusicVolume());
         }
       });
 
