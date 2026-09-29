@@ -98,8 +98,8 @@ window.CONFIG = {
   //   left/top: canto superior esquerdo do botão
   //   width/height: tamanho do botão
     hotspots: {
-        confirm: { left:14.612650321286672, top:85.66742603543835, width:30.889559511821087, height:8.917614410407161 },
-        gift: { left:53.98780574768386, top:85.311350295716, width:32.85782747603834, height:9.909305144152878 }
+        confirm: { left:53.9794625528754, top:86.01265832679307, width:30.889559511821087, height:8.917614410407161 },
+        gift: { left:14.72901044516788, top:85.65656941780536, width:32.85782747603834, height:9.909305144152878 }
   },
 
   // ----- CONTAGEM REGRESSIVA ---------------------------------------------
